@@ -23,6 +23,73 @@ class DataBase():
                 number      INTEGER,
                 string      TEXT                    
             );
+            CREATE TABLE Person
+            (
+                ID              INTEGER PRIMARY KEY,
+                LastName        TEXT,
+                FirstName       TEXT,
+                DateOfBirth     DATE,
+                Email           TEXT,
+                PhoneNumber     TEXT,
+                Address         TEXT, -- sep
+                SSN             TEXT  
+            );
+            CREATE TABLE Branch
+            (
+                ID              INTEGER PRIMARY KEY,
+                Name            TEXT,
+                Code            TEXT,
+                PhoneNumber     TEXT,
+                Address         TEXT -- sep
+            );
+            CREATE TABLE Employee
+            (
+                ID              INTEGER PRIMARY KEY,
+                Position        TEXT -- sep               
+            );
+            CREATE TABLE Customer
+            (
+                ID              INTEGER PRIMARY KEY,
+                Type            TEXT -- sep                   
+            );
+            CREATE TABLE Account
+            (
+                ID              INTEGER PRIMARY KEY,
+                Type            TEXT, -- sep
+                AccountNumber   TEXT,
+                Balance         REAL,
+                DateOpened      DATE,
+                DateClosed      DATE,
+                Status          TEXT -- sep               
+            );
+            CREATE TABLE Loan
+            (
+                ID              INTEGER PRIMARY KEY,
+                Type            TEXT, -- sep
+                Amount          REAL,
+                InterestRate    REAL,
+                Term            INTEGER,
+                StartDate       DATE,
+                EndDate         DATE,
+                Status          TEXT -- sep                    
+            );
+            CREATE TABLE LoanPayment
+            (
+                ID              INTEGER PRIMARY KEY,
+                ScheduledDate   DATE,
+                PaymentAmount   REAL,
+                Principal       REAL,
+                Interest        REAL,
+                PaidAmount      REAL,
+                PaidDate        DATE                    
+            );
+            CREATE TABLE Transactions
+            (
+                ID              INTEGER PRIMARY KEY,
+                Type            TEXT, -- sep
+                Amount          REAL,
+                Date            DATE                  
+            );
                                 """)
 
     def check_existance(self):
