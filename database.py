@@ -16,79 +16,89 @@ class DataBase():
         """Create all the tables of the database."""
 
         self.__db.executescript("""
+                                                   
+            -- People: (Persons, Employees, Customers)
+
+            CREATE TABLE Persons
+            (
+                person_id       INTEGER PRIMARY KEY,
+                address         TEXT, -- sep
+                last_name       TEXT,
+                first_name      TEXT,
+                date_of_birth   DATE,
+                email           TEXT,
+                phone_number    TEXT,
+                ssn             TEXT
+            );
+            CREATE TABLE Employees
+            (
+                employee_id     INTEGER REFERENCES Persons(person_id),
+                position        TEXT, -- sep
+                branch_id       INTEGER REFERENCES Branches(branch_id)               
+            );
+            CREATE TABLE Customers
+            (
+                customer_id     INTEGER REFERENCES Persons(person_id),
+                type            TEXT -- sep                  
+            );
                                 
-            CREATE TABLE Example
+            -- Bank elements: (Branches, Accounts)
+
+            CREATE TABLE Branches
             (
-                id          INTEGER PRIMARY KEY,
-                number      INTEGER,
-                string      TEXT                    
+                branch_id       INTEGER PRIMARY KEY,
+                address         TEXT, -- sep
+                accounts_id     INTEGER REFERENCES Accounts(account_id),
+                name            TEXT,
+                code            TEXT,
+                phone_number    TEXT
             );
-            CREATE TABLE Person
+            CREATE TABLE Accounts
             (
-                ID              INTEGER PRIMARY KEY,
-                LastName        TEXT,
-                FirstName       TEXT,
-                DateOfBirth     DATE,
-                Email           TEXT,
-                PhoneNumber     TEXT,
-                Address         TEXT, -- sep
-                SSN             TEXT  
+                account_id      INTEGER PRIMARY KEY,
+                type            TEXT, -- sep
+                status          TEXT, -- sep
+                customer_id     INTEGER REFERENCES Customers(customer_id),
+                account_number  TEXT,
+                balance         REAL,
+                date_opened     DATE,
+                date_closed     DATE               
             );
-            CREATE TABLE Branch
+                                
+            -- Cash flows: (loans, LoanPayments, Transactions)
+
+            CREATE TABLE Loans
             (
-                ID              INTEGER PRIMARY KEY,
-                Name            TEXT,
-                Code            TEXT,
-                PhoneNumber     TEXT,
-                Address         TEXT -- sep
+                loan_id         INTEGER PRIMARY KEY,
+                type            TEXT, -- sep
+                status          TEXT, -- sep
+                customer_id     INTEGER REFERENCES Customers(customer_id),
+                amount          REAL,
+                interest_rate   REAL,
+                term            INTEGER,
+                start_date      DATE,
+                end_date        DATE                    
             );
-            CREATE TABLE Employee
+            CREATE TABLE LoanPayments
             (
-                ID              INTEGER PRIMARY KEY,
-                Position        TEXT -- sep               
-            );
-            CREATE TABLE Customer
-            (
-                ID              INTEGER PRIMARY KEY,
-                Type            TEXT -- sep                   
-            );
-            CREATE TABLE Account
-            (
-                ID              INTEGER PRIMARY KEY,
-                Type            TEXT, -- sep
-                AccountNumber   TEXT,
-                Balance         REAL,
-                DateOpened      DATE,
-                DateClosed      DATE,
-                Status          TEXT -- sep               
-            );
-            CREATE TABLE Loan
-            (
-                ID              INTEGER PRIMARY KEY,
-                Type            TEXT, -- sep
-                Amount          REAL,
-                InterestRate    REAL,
-                Term            INTEGER,
-                StartDate       DATE,
-                EndDate         DATE,
-                Status          TEXT -- sep                    
-            );
-            CREATE TABLE LoanPayment
-            (
-                ID              INTEGER PRIMARY KEY,
-                ScheduledDate   DATE,
-                PaymentAmount   REAL,
-                Principal       REAL,
-                Interest        REAL,
-                PaidAmount      REAL,
-                PaidDate        DATE                    
+                loan_payment_id INTEGER PRIMARY KEY,
+                loan_id         INTEGER REFERENCES Loans(loan_id),
+                scheduled_date  DATE,
+                payment_amount  REAL,
+                principal       REAL,
+                interest        REAL,
+                paid_amount     REAL,
+                paid_date       DATE
             );
             CREATE TABLE Transactions
             (
-                ID              INTEGER PRIMARY KEY,
-                Type            TEXT, -- sep
-                Amount          REAL,
-                Date            DATE                  
+                transaction_id  INTEGER PRIMARY KEY,
+                type            TEXT, -- sep
+                loan_payment_id INTEGER REFERENCES LoanPayments(loan_payment_id),
+                account_id      INTEGER REFERENCES Accounts(account_id),
+                employee_id     INTEGER REFERENCES Employees(employee_id),
+                amount          REAL,
+                date            DATE                  
             );
                                 """)
 
