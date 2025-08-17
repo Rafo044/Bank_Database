@@ -60,7 +60,6 @@ class DataBase():
         (
             branch_id           INTEGER PRIMARY KEY,
             address_id          INTEGER REFERENCES Addresses(address_id),
-            accounts_id         INTEGER REFERENCES Accounts(account_id),
             name                TEXT,
             code                TEXT,
             phone_number        TEXT
@@ -69,8 +68,9 @@ class DataBase():
         (
             account_id          INTEGER PRIMARY KEY,
             type_id             INTEGER REFERENCES AccountTypes(type_id),
-            status              INTEGER REFERENCES AccountStatus(status_id),
+            status_id           INTEGER REFERENCES AccountStatus(status_id),
             customer_id         INTEGER REFERENCES Customers(customer_id),
+            branch_id           INTEGER REFERENCES Branches(branch_id),
             account_number      TEXT,
             balance             REAL,
             date_opened         DATE,
@@ -118,8 +118,9 @@ class DataBase():
             transaction_id      INTEGER PRIMARY KEY,
             type_id             INTEGER REFERENCES TransactionTypes(type_id),
             loan_payment_id     INTEGER REFERENCES LoanPayments(loan_payment_id),
-            account_id          INTEGER REFERENCES Accounts(account_id),
             employee_id         INTEGER REFERENCES Employees(employee_id),
+            from_account        INTEGER REFERENCES Accounts(account_id),
+            to_account          INTEGER REFERENCES Accounts(account_id),
             amount              REAL,
             date                DATE                  
         );
@@ -150,6 +151,21 @@ class DataBase():
             country             TEXT                  
         );
                                 """)
+        
+    def initialize(self):
+        """Inserts necessary data into the database."""
+        pass
+
+        # People: employee positions and customer types
+
+
+        # Accounts: types and status
+
+
+        # Loans: types and status
+
+
+        # Transactions: types
 
     def check_existance(self):
         """Check whether a database exists with the given filename."""
