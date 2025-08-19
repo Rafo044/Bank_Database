@@ -153,90 +153,6 @@ class DataBase():
         );
                                 """)
 
-    def add_employee_positions(self, employee_positions: list = ["Banker",
-                                                                 "Analyst",
-                                                                 "Manager",
-                                                                 "Teller"]):
-        """Employee positions"""
-
-        query = f"""
-        INSERT INTO EmployeePositions(employee_position) VALUES (?)
-        """
-
-        for item in employee_positions:
-            self.__db.execute(query,[item])
-
-    def add_customer_types(self, customer_types: list = ["Individual",
-                                                         "Business"]):
-        """Customer types"""
-
-        query = f"""
-        INSERT INTO CustomerTypes(customer_type) VALUES (?)
-        """
-
-        for item in customer_types:
-            self.__db.execute(query,[item])
-
-    def add_account_types(self, account_types: list = ["Checking",
-                                                       "Savings",
-                                                       "Credit"]):
-        """Account types"""
-
-        query = f"""
-        INSERT INTO AccountTypes(account_type) VALUES (?)
-        """
-
-        for item in account_types:
-            self.__db.execute(query,[item])
-
-    def add_account_status(self, account_status: list = ["Active",
-                                                         "Suspended",
-                                                         "Closed"]):
-        """Account status"""
-
-        query = f"""
-        INSERT INTO AccountStatus(account_status) VALUES (?)
-        """
-
-        for item in account_status:
-            self.__db.execute(query,[item])
-
-    def add_loan_types(self, loan_types: list = ["Checking",
-                                                 "Savings",
-                                                 "Credit"]):
-        """Loan types"""
-
-        query = f"""
-        INSERT INTO LoanTypes(loan_type) VALUES (?)
-        """
-
-        for item in loan_types:
-            self.__db.execute(query,[item])
-
-    def add_loan_status(self, loan_status: list = ["Active",
-                                                   "Suspended",
-                                                   "Closed"]):
-        """Loan status"""
-
-        query = f"""
-        INSERT INTO LoanStatus(loan_status) VALUES (?)
-        """
-
-        for item in loan_status:
-            self.__db.execute(query,[item])
-
-    def add_transaction_types(self, transaction_types: list = ["Deposit",
-                                                               "Withdrawal",
-                                                               "Transfer"]):
-        """Transaction types"""
-
-        query = f"""
-        INSERT INTO LoanTypes(loan_type) VALUES (?)
-        """
-
-        for item in transaction_types:
-            self.__db.execute(query,[item])
-
     def __qmarks(self, l: list):
         """Returns a string of question marks based on list length."""
 
@@ -252,18 +168,3 @@ if __name__ == "__main__":
     
     db = DataBase()
     db.create_tables()
-
-    db.add_employee_positions()
-    db.add_customer_types()
-    db.add_account_types()
-    db.add_account_status()
-    db.add_loan_types()
-    db.add_loan_status()
-    db.add_transaction_types()
-
-    q = sqlite3.connect(db.name)
-    query1 = """SELECT * FROM EmployeePositions"""
-
-    values = q.execute(query1).fetchall()
-
-    print(values)
