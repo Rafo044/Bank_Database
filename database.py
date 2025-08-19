@@ -9,7 +9,7 @@ class DataBase():
         """Creates a new empty database."""
 
         self.name = name
-        self.check_existance()
+        self.check_existance() # remove old db if it exists
         self.__db = sqlite3.connect(name)
         self.__db.isolation_level = None # commit required without this
 
@@ -120,8 +120,8 @@ class DataBase():
             type_id             INTEGER REFERENCES TransactionTypes(type_id),
             loan_payment_id     INTEGER REFERENCES LoanPayments(loan_payment_id),
             employee_id         INTEGER REFERENCES Employees(employee_id),
-            from_account        INTEGER REFERENCES Accounts(account_id),
-            to_account          INTEGER REFERENCES Accounts(account_id),
+            from_account_id     INTEGER REFERENCES Accounts(account_id),
+            to_account_id       INTEGER REFERENCES Accounts(account_id),
             amount              REAL,
             date                DATE                  
         );
@@ -240,38 +240,13 @@ class DataBase():
     def __qmarks(self, l: list):
         """Returns a string of question marks based on list length."""
 
-        return (len(l) * "?,")[:-1] # remove "," from the end
+        return (len(l) * "?,")[:-1] # exclude "," from the end
 
     def check_existance(self):
         """Checks whether a database exists with the given filename."""
 
         if os.path.exists(self.name):
             os.remove(self.name)
-
-class Query():
-
-    def __init__(self, db: DataBase):
-        """Run queries on a database."""
-
-        self.__db = sqlite3.connect(db.name)
-
-    def add_test(self,number: int, string: str):
-        """Add testing."""
-
-        query = """
-        INSERT INTO Example(number, string) VALUES (?,?)
-        """
-        id = self.__db.execute(query,[number,string])
-        return id
-
-    def query_test(self):
-        """Query testing."""
-
-        query = """
-        SELECT * FROM Example
-        """
-        results = self.__db.execute(query).fetchall()
-        return results
 
 if __name__ == "__main__":
     
