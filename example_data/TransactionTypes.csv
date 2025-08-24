@@ -1,0 +1,5 @@
+type_id,transaction_type
+1,Deposit
+2,Withdrawal
+3,Transfer
+4,Loan Payment

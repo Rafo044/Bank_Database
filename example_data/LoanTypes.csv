@@ -1,0 +1,5 @@
+type_id,loan_type
+1,Mortgage
+2,Auto
+3,Personal
+4,Business

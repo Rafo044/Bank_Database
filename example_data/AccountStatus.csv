@@ -1,0 +1,4 @@
+status_id,account_status,reason
+1,Active,NULL
+2,Closed,Customer Request
+3,Frozen,Suspicious Activity

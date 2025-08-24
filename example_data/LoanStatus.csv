@@ -1,0 +1,4 @@
+status_id,loan_status
+1,Active
+2,Paid
+3,Default

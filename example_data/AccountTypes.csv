@@ -1,0 +1,6 @@
+type_id,account_type
+1,Checking
+2,Savings
+3,Credit Card
+4,Mortgage
+5,Loan Repayment
