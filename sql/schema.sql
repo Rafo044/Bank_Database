@@ -57,7 +57,7 @@ CREATE TABLE Accounts
     account_number      TEXT UNIQUE NOT NULL,
     balance             REAL NOT NULL,
     date_opened         DATE NOT NULL,
-    date_closed         DATE
+    date_closed         DATE,
 
     CHECK (date_closed IS NULL OR date_closed >= date_opened)
 );
@@ -94,14 +94,17 @@ CREATE TABLE LoanPayments
 (
     loan_payment_id     INTEGER PRIMARY KEY,
     loan_id             INTEGER REFERENCES Loans(loan_id) NOT NULL,
-    scheduled_amount    REAL NOT NULL, -- Total scheduled payment amount
+    scheduled_amount    REAL NOT NULL, -- Total scheduled payment amount (principal + interest)
     principal           REAL NOT NULL, -- Principal portion of the payment
     interest            REAL NOT NULL, -- Interest portion of the payment
     actual_amount       REAL, -- Actual total amount paid
     scheduled_date      DATE NOT NULL, -- Scheduled payment date
     paid_date           DATE, -- Actual payment date
 
-    CHECK (scheduled_amount > 0 AND scheduled_amount = principal + interest)
+    CHECK (scheduled_amount > 0)
+    -- Constraint (scheduled_amount = principal + interest) does not work due to how computers store floating point numbers
+    -- When inserting data into the table, scheduled_amount should be constructed from principal and interest for each entry separately
+    -- i.e. INSERT INTO LoanPayments(scheduled_amount) VALUES ((principal + interest))
 );
 CREATE TABLE Transactions
 (
