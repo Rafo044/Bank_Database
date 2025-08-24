@@ -1,12 +1,23 @@
 import sqlite3
 import csv
-import pandas as pd
-from time import process_time
-from database import DataBase, connect_to_db
+from database import DataBase
+from helper_functions import ifnull
 
-"""The functions of this module insert the example data into the bank database."""
+"""
+The functions of this module insert the example data into the bank database.
 
-db = connect_to_db(DataBase("bank_database.db"))
+Python-SQLite datatypes:
+None    NULL
+int     INTEGER
+float   REAL
+str     TEXT
+bytes   BLOB
+
+DATE is a string in YYYY-MM-DD format.
+Data from csv files is in string format by default.
+"""
+
+db = DataBase("bank_database.db",replace=True).connect_to_db()
 
 # ** REFERENCE TABLES **
 
@@ -48,7 +59,7 @@ def insert_AccountStatus(file: str):
         data = csv.reader(csv_file)
         next(data)
         for row in data:
-            db.execute(q,[row[1],row[2]])
+            db.execute(q,[row[1],ifnull(row[2])])
 
 def insert_LoanTypes(file: str):
     q = """
@@ -100,7 +111,7 @@ def insert_Addresses(file: str):
         data = csv.reader(csv_file)
         next(data)
         for row in data:
-            db.execute(q,[row[1],row[2],row[3],row[4],row[5]])
+            db.execute(q,[int(row[1]),row[2],row[3],row[4],row[5]])
 
 def insert_Branches(file: str):
     q = """
@@ -110,7 +121,7 @@ def insert_Branches(file: str):
         data = csv.reader(csv_file)
         next(data)
         for row in data:
-            db.execute(q,[row[1],row[2],row[3],row[4]])
+            db.execute(q,[int(row[1]),row[2],row[3],row[4]])
 
 def insert_Persons(file: str):
     q = """
@@ -120,7 +131,7 @@ def insert_Persons(file: str):
         data = csv.reader(csv_file)
         next(data)
         for row in data:
-            db.execute(q,[row[1],row[2],row[3],row[4],row[5],row[6],row[7]])
+            db.execute(q,[int(row[1]),row[2],row[3],row[4],ifnull(row[5]),row[6],row[7]])
 
 def insert_Employees(file: str):
     q = """
@@ -130,7 +141,7 @@ def insert_Employees(file: str):
         data = csv.reader(csv_file)
         next(data)
         for row in data:
-            db.execute(q,[row[0],row[1],row[2]])
+            db.execute(q,[int(row[0]),int(row[1]),int(row[2])])
 
 def insert_Customers(file: str):
     q = """
@@ -140,7 +151,7 @@ def insert_Customers(file: str):
         data = csv.reader(csv_file)
         next(data)
         for row in data:
-            db.execute(q,[row[0],row[1]])
+            db.execute(q,[int(row[0]),int(row[1])])
 
 # ** FINANCIAL TABLES **
 
@@ -152,11 +163,7 @@ def insert_Accounts(file: str):
         data = csv.reader(csv_file)
         next(data)
         for row in data:
-            if row[8] != "":
-                db.execute(q,[row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8]])
-            else:
-                null = "NULL"
-                db.execute(q,[row[1],row[2],row[3],row[4],row[5],row[6],row[7],null])
+            db.execute(q,[int(row[1]),int(row[2]),int(row[3]),int(row[4]),row[5],round(float(row[6]),2),row[7],ifnull(row[8])])
 
 def insert_Loans(file: str):
     q = """
@@ -166,7 +173,7 @@ def insert_Loans(file: str):
         data = csv.reader(csv_file)
         next(data)
         for row in data:
-            db.execute(q,[row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8]])
+            db.execute(q,[int(row[1]),int(row[2]),int(row[3]),round(float(row[4]),2),round(float(row[5]),2),int(row[6]),row[7],row[8]])
 
 def insert_LoanPayments(file: str):
     q = """
@@ -176,7 +183,7 @@ def insert_LoanPayments(file: str):
         data = csv.reader(csv_file)
         next(data)
         for row in data:
-            db.execute(q,[row[1],row[2],row[3],row[4],row[5],row[6],row[7]])
+            db.execute(q,[int(row[1]),round(float(row[3]) + float(row[4]),2),round(float(row[3]),2),round(float(row[4]),2),ifnull(row[5]) if row[5] == "NULL" else round(float(row[5]),2),row[6],ifnull(row[7])])
 
 def insert_Transactions(file: str):
     q = """
@@ -186,7 +193,7 @@ def insert_Transactions(file: str):
         data = csv.reader(csv_file)
         next(data)
         for row in data:
-            db.execute(q,[row[1],ifnull(row[2]),ifnull(row[3]),row[4],ifnull(row[5]),row[6],row[7]])
+            db.execute(q,[int(row[1]),ifnull(row[2]) if row[2] == "NULL" else int(row[2]),ifnull(row[3]) if row[3] == "NULL" else int(row[3]),int(row[4]),ifnull(row[5]) if row[5] == "NULL" else int(row[5]),round(float(row[6]),2),row[7]])
 
 def insert_all():
     # Path to files
@@ -216,7 +223,7 @@ def insert_all():
     insert_Customers(path+core[4])
 
     # Financial tables
-    fin = "Accounts.csv Loans.csv LoanPayments_fixed.csv Transactions.csv"
+    fin = "Accounts.csv Loans.csv LoanPayments.csv Transactions.csv"
     fin = fin.split()
 
     insert_Accounts(path+fin[0])
@@ -224,57 +231,5 @@ def insert_all():
     insert_LoanPayments(path+fin[2])
     insert_Transactions(path+fin[3])
 
-def fix_loanpaymentscsv():
-    """Fixes LoanPayments.csv to meet the constraints of CHECK"""
-
-    path = "./example_data/LoanPayments.csv"
-
-    df = pd.read_csv(path)
-    fixed_col = (df["principal"] + df["interest"]).round(2)
-    df.drop(columns=["scheduled_amount"],inplace=True)
-    df.insert(2,"scheduled_amount",fixed_col)
-    
-    to_path = "./example_data/LoanPayments_fixed.csv"
-    df.to_csv(to_path,sep=",",index=False)
-
-def fix_transactionscsv():
-    """Fixes Transactions.csv to meet the foreign key constraints"""
-
-    path = "./example_data/Transactions.csv"
-
-    df = pd.read_csv(path)
-    df.fillna("NULL",inplace=True)
-    
-    to_path = "./example_data/Transactions_fixed.csv"
-    df.to_csv(to_path,sep=",",index=False)
-
-def ifnull(value):
-    if len(value) == 0:
-        return "NULL"
-    else:
-        return value
-
-def test(file):
-    with open(file) as csv_file:
-        data = csv.reader(csv_file)
-        next(data)
-        for row in data:
-            if row[1] == "" or row[4] == "":
-                print(f"Row {row[0]} is empty!")
-
-def test2(file):
-    q = """
-    INSERT INTO LoanPayments(loan_id,scheduled_amount,principal,interest,actual_amount,scheduled_date,paid_date) VALUES (?,?,?,?,?,?,?)
-    """
-    db.execute(q,[1,5,2,3,4,"2024-12-12","2023-12-12"])
-
 if __name__ == "__main__":
-    start_time = process_time()
-    insert_all()
-    print(f"Time taken: {process_time() - start_time}")
-
-    #fix_loanpaymentscsv()
-    #test("./example_data/LoanPayments_fixed.csv")
-    #test2("./example_data/LoanPayments_fixed.csv")
-
-    #fix_transactionscsv()
+    pass
