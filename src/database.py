@@ -6,7 +6,7 @@ import os.path
 
 class DataBase():
 
-    def __init__(self, name: str = "example.db", replace: bool = True):
+    def __init__(self, name: str = "example.db", replace: bool = False):
         """
         Creates a new empty database.
         
@@ -14,7 +14,7 @@ class DataBase():
         ----------
         name: `str` = "example.db"
             filename for the database
-        replace: `bool`  = True
+        replace: `bool` = False
             replace the file if it exists with the given name
         """
 
@@ -27,7 +27,21 @@ class DataBase():
 
         self.__create_tables()
 
-    def __create_tables(self):
+    def connect_to_db(self) -> sqlite3.Connection:
+        """Returns an sqlite3 Connection."""
+
+        return sqlite3.connect(self.name,isolation_level=None)#.execute("PRAGMA foreign_keys = ON")
+    
+    def __check_existance(self):
+        """Checks whether a database exists with the given filename."""
+
+        if os.path.exists(self.name):
+            if self.__replace:
+                os.remove(self.name)
+            else:
+                raise ValueError("A database with the given filename already exists.")
+
+    def __create_tables(self) -> None:
         """Creates all the tables of the database."""
 
         self.__db.executescript("""
@@ -91,7 +105,7 @@ class DataBase():
             account_number      TEXT UNIQUE NOT NULL,
             balance             REAL NOT NULL,
             date_opened         DATE NOT NULL,
-            date_closed         DATE
+            date_closed         DATE,
 
             CHECK (date_closed IS NULL OR date_closed >= date_opened)
         );
@@ -128,14 +142,17 @@ class DataBase():
         (
             loan_payment_id     INTEGER PRIMARY KEY,
             loan_id             INTEGER REFERENCES Loans(loan_id) NOT NULL,
-            scheduled_amount    REAL NOT NULL, -- Total scheduled payment amount
+            scheduled_amount    REAL NOT NULL, -- Total scheduled payment amount (principal + interest)
             principal           REAL NOT NULL, -- Principal portion of the payment
             interest            REAL NOT NULL, -- Interest portion of the payment
             actual_amount       REAL, -- Actual total amount paid
             scheduled_date      DATE NOT NULL, -- Scheduled payment date
             paid_date           DATE, -- Actual payment date
 
-            CHECK (scheduled_amount > 0 AND scheduled_amount = principal + interest)
+            CHECK (scheduled_amount > 0)
+            -- Constraint (scheduled_amount = principal + interest) does not work due to how computers store floating point numbers
+            -- When inserting data into the table, scheduled_amount should be constructed from principal and interest for each entry separately
+            -- i.e. INSERT INTO LoanPayments(scheduled_amount) VALUES ((principal + interest))
         );
         CREATE TABLE Transactions
         (
@@ -187,19 +204,5 @@ class DataBase():
         );
                                 """)
 
-    def __check_existance(self):
-        """Checks whether a database exists with the given filename."""
-
-        if os.path.exists(self.name):
-            if self.__replace:
-                os.remove(self.name)
-            else:
-                raise ValueError("A database with the given filename already exists.")
-
-def connect_to_db(database: DataBase) -> sqlite3.Connection:
-    """Returns an sqlite3 Connection."""
-
-    return sqlite3.connect(database.name,isolation_level=None).execute("PRAGMA foreign_keys = ON")
-
 if __name__ == "__main__":
-    print(sqlite3.sqlite_version)
+    pass
