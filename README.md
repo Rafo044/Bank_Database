@@ -8,7 +8,7 @@ A relational database of a retail bank's entities and their relationships built 
 
 The database models a bank's customers, employees and branches and the interactions between them, such as accounts, loans and various types of transactions. The schema also contains several reference tables of normalized information to allow greater detail.
 
-![Entity-Relationship diagram picture.](C:\Users\Niklas\bank-database\ER_diagram.png)
+![Entity-Relationship diagram picture.](ER_diagram.png)
 
 **Core tables:**
 - Addresses
