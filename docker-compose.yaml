@@ -29,9 +29,7 @@ services:
 
 
   airflow:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: airflow:3.0.4-python3.12
     entrypoint: /bin/bash
     command:
       - -c
