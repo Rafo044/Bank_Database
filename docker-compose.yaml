@@ -1,0 +1,94 @@
+version: "3.9"
+
+services:
+  data_warehouse:
+    image: mysql:8.1
+    container_name: data_warehouse
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: "data_warehouse"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DEFAULT_AUTHENTICATION_PLUGIN: mysql_native_password
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./mysql_init/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+
+  airflow_db:
+    image: postgres:17.4
+    container_name: airflow_db
+    environment:
+      POSTGRES_DB: "airflow_db"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    volumes:
+      - ./airflow-db:/var/lib/postgresql/data
+
+
+  airflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username "${AIRFLOW_USERNAME}" \
+          --password "${AIRFLOW_PASSWORD}" \
+          --firstname admin \
+          --lastname admin \
+          --role Admin \
+          --email admin
+        airflow scheduler &
+        airflow dag-processor &
+        airflow triggerer &
+        airflow api-server --port 8080
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - data_warehouse
+      - airflow_db
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@airflow_db/airflow_db"
+      AIRFLOW_CONN_DATA_WAREHOUSE_CONNECTION: "mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@data_warehouse:3306/data_warehouse?ssl_disabled=true"
+      AIRFLOW__CORE__EXECUTOR: "LocalExecutor"
+      AIRFLOW__CORE__AUTH_MANAGER: "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./airflow-db:/opt/airflow/airflow-db
+      - ./data:/opt/airflow/import/data
+
+
+
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    restart: always
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - data_warehouse
+      - airflow_db
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    ports:
+      - "3002:3000"
+    restart: always
+    depends_on:
+      - data_warehouse
