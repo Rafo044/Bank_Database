@@ -26,7 +26,7 @@ from loaders import (
 
 # Path to CSV folder
 CSV_PATH = "/opt/airflow/example_data/"
-MYSQL_CONN_ID = "my_mysql"
+MYSQL_CONN_ID = "mysql_conn"
 
 with DAG(
     dag_id="load_bank_data",
