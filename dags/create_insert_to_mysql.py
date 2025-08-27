@@ -1,6 +1,5 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.operators.dummy import DummyOperator
 from datetime import datetime
 import os
 
@@ -31,14 +30,12 @@ MYSQL_CONN_ID = "mysql_conn"
 with DAG(
     dag_id="load_bank_data",
     start_date=datetime(2025, 8, 27),
-    schedule_interval=None,
+    schedule=None,
     catchup=False,
 ) as dag:
 
-    start = DummyOperator(task_id="start")
-    end = DummyOperator(task_id="end")
 
-    # ---------- Reference tables ----------
+    # ---------- Tasks1 ----------
     t_employee_positions = PythonOperator(
         task_id="employee_positions",
         python_callable=insert_EmployeePositions,
@@ -87,15 +84,9 @@ with DAG(
         op_kwargs={"file": os.path.join(CSV_PATH, "AddressTypes.csv"), "mysql_conn_id": MYSQL_CONN_ID},
     )
 
-    # Serial reference table execution
-    ref_tasks = [
-        t_employee_positions, t_customer_types, t_account_types,
-        t_account_status, t_loan_types, t_loan_status,
-        t_transaction_types, t_address_types
-    ]
-    start >> ref_tasks
+ 
 
-    # ---------- Core tables ----------
+    # ---------- Tasks2 ----------
     t_addresses = PythonOperator(
         task_id="addresses",
         python_callable=insert_Addresses,
@@ -126,11 +117,13 @@ with DAG(
         op_kwargs={"file": os.path.join(CSV_PATH, "Customers.csv"), "mysql_conn_id": MYSQL_CONN_ID},
     )
 
-    # Connect reference -> core
-    for ref_task in ref_tasks:
-        ref_task >> [t_addresses, t_branches, t_persons, t_employees, t_customers]
+    
 
-    # ---------- Financial tables ----------
+
+
+    
+    #------  Tasks3 ------------#
+    
     t_accounts = PythonOperator(
         task_id="accounts",
         python_callable=insert_Accounts,
@@ -155,10 +148,9 @@ with DAG(
         op_kwargs={"file": os.path.join(CSV_PATH, "Transactions.csv"), "mysql_conn_id": MYSQL_CONN_ID},
     )
 
-    # Connect core -> financial
-    core_tasks = [t_addresses, t_branches, t_persons, t_employees, t_customers]
-    for core_task in core_tasks:
-        core_task >> [t_accounts, t_loans, t_loan_payments, t_transactions]
 
-    # End
-    [t_accounts, t_loans, t_loan_payments, t_transactions] >> end
+
+
+
+    t_employee_positions >> t_customer_types >> t_account_types >> t_account_status >> t_loan_types >> t_loan_status >> t_transaction_types  >> t_address_types >> t_addresses >> t_branches >> t_persons >> t_employees >> t_customers >> t_accounts >> t_loans >>  t_loan_payments >> t_transactions
+    

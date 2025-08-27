@@ -56,7 +56,7 @@ services:
       - airflow_db
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@airflow_db/airflow_db"
-      AIRFLOW_CONN_DATA_WAREHOUSE_CONNECTION: "mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@data_warehouse:3306/data_warehouse?ssl_disabled=true"
+      AIRFLOW_CONN_DATA_WAREHOUSE_CONNECTION: "mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@data_warehouse:3306/bank?ssl_disabled=true"
       AIRFLOW__CORE__EXECUTOR: "LocalExecutor"
       AIRFLOW__CORE__AUTH_MANAGER: "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
@@ -67,7 +67,7 @@ services:
       - ./plugins:/opt/airflow/plugins
       - ./airflow-db:/opt/airflow/airflow-db
       - ./data:/opt/airflow/import/data
-
+      - ./example_data:/opt/airflow/example_data
 
 
 

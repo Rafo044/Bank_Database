@@ -1,6 +1,6 @@
 import csv
 from airflow.providers.mysql.hooks.mysql import MySqlHook
-from helper_functions import ifnull
+from src.helper_functions import ifnull
 
 # ==========================
 # Helper function: generic insert
