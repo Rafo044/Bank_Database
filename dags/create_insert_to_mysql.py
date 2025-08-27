@@ -4,7 +4,7 @@ from airflow.operators.dummy import DummyOperator
 from datetime import datetime
 import os
 
-from loaders import (
+from src.loaders import (
     insert_EmployeePositions,
     insert_CustomerTypes,
     insert_AccountTypes,
