@@ -3,9 +3,8 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.providers.mysql.hooks.mysql import MySqlHook
 from datetime import datetime
-from src.insert_functions import insert_Accounts
-from src.insert_functions import insert_AccountTypes
-from src.
+from src.insert_functions import insert_all
+
 
 def run_mysql_script(file_path, conn_id='mysql_conn'):
     hook = MySqlHook(mysql_conn_id=conn_id)
