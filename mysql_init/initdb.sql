@@ -4,4 +4,4 @@
 ALTER USER 'mysql'@'%' IDENTIFIED WITH mysql_native_password BY 'mysql123';
 FLUSH PRIVILEGES;
 
-CREATE DATABASE IF NOT EXISTS data_warehouse;
+CREATE DATABASE IF NOT EXISTS bank;
