@@ -1,4 +1,10 @@
 
+
+## Data Pipline 
+
+![Data Pipline](./docs/images/pipline.png)
+
+
 mysql -p
 
 passvord .....
