@@ -5,6 +5,12 @@
 ![Data Pipline](./docs/images/pipline.png)
 
 
+
+## ER Diagram
+
+![ER Diagram](./docs/images/ER_diagram.png)
+
+
 mysql -p
 
 passvord .....
